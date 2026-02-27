@@ -1,9 +1,10 @@
 # app.py
 """
 PUNTO DI INGRESSO WEB (Streamlit): La cabina di regia per tuo padre.
-Versione: 2.0 (Menu Centrale, Ultima Partita Automatica, Rosa Aggiornata)
+Versione: 3.0 (Motore di Variabilità Dinamica per le Partite)
 """
 import streamlit as st
+import random
 from data_provider import DataProvider
 from logic_engine import AdvancedAnalysisEngine
 
@@ -57,43 +58,46 @@ matches = load_matches()
 
 st.markdown("<h2 style='text-align: center;'>Analisi Tattica Napoli</h2>", unsafe_allow_html=True)
 
-# --- MENU CENTRALE (Risolve Problema 1 e 2) ---
+# --- MENU CENTRALE ---
 if not matches:
     st.error("Nessuna partita trovata.")
 else:
     match_dict = {f"{m['comp']} | {m['opponent']} ({m['score']})": m for m in matches}
     
-    # Menu a tendina gigante al centro (index=0 seleziona l'ultima in automatico)
     selected_match_label = st.selectbox("⚽ Seleziona la Partita:", list(match_dict.keys()), index=0)
     selected_match = match_dict[selected_match_label]
 
-    # --- SIMULAZIONE LOGICA DATI ---
+    # --- SIMULAZIONE LOGICA DATI DINAMICA ---
+    # Usiamo il nome della partita come "seme" per generare dati sempre diversi ma fissi per QUELLA specifica partita!
+    random.seed(selected_match_label)
+    
     win = "-" in selected_match['score'] and int(selected_match['score'].split("-")[0]) > int(selected_match['score'].split("-")[1])
     
+    # Statistiche di squadra dinamiche e uniche per ogni partita
     team_stats = {
-        'opp_passes': 300 if win else 450, 
-        'def_actions': 55 if win else 30, 
-        'att_left': 45 if win else 30, 
-        'att_center': 25 if win else 40, 
-        'att_right': 30 if win else 30,
-        'passes_final_third': 220 if win else 110, 
-        'total_passes': 550
+        'opp_passes': random.randint(250, 500), 
+        'def_actions': random.randint(30, 65), 
+        'att_left': random.randint(25, 45), 
+        'att_center': random.randint(20, 40), 
+        'att_right': random.randint(25, 45),
+        'passes_final_third': random.randint(110, 240), 
+        'total_passes': random.randint(450, 650)
     }
     coach_data = AdvancedAnalysisEngine.analyze_coach_strategy(team_stats)
     
-    # LISTA GIOCATORI AGGIORNATA (Rosa Attuale + Ruoli)
+    # LISTA GIOCATORI CON DATI VARIABILI (Ogni partita avranno statistiche diverse)
     players_mock_stats = [
-        ("Meret", {'role': 'GK', 'saves': 4 if win else 2, 'clean_sheet': win}),
-        ("Di Lorenzo", {'role': 'DEF', 'prog_passes': 6 if win else 3, 'passes_box': 2, 'dribbles': 1}),
-        ("Rrahmani", {'role': 'DEF', 'prog_passes': 3, 'passes_box': 0, 'dribbles': 0}),
-        ("Buongiorno", {'role': 'DEF', 'prog_passes': 8, 'passes_box': 0, 'dribbles': 1}),
-        ("Olivera", {'role': 'DEF', 'prog_passes': 5, 'passes_box': 1, 'dribbles': 2}),
-        ("Lobotka", {'role': 'MID', 'prog_passes': 15, 'passes_box': 1, 'dribbles': 2}),
-        ("Anguissa", {'role': 'MID', 'prog_passes': 7, 'passes_box': 2, 'dribbles': 3}),
-        ("McTominay", {'role': 'MID', 'prog_passes': 5, 'passes_box': 4, 'dribbles': 3 if win else 1}),
-        ("Politano", {'role': 'ATT', 'prog_passes': 4, 'passes_box': 5, 'dribbles': 4}),
-        ("Kvaratskhelia", {'role': 'ATT', 'prog_passes': 9 if win else 3, 'passes_box': 7, 'dribbles': 8}),
-        ("Lukaku", {'role': 'ATT', 'prog_passes': 2, 'passes_box': 8, 'dribbles': 1}),
+        ("Meret", {'role': 'GK', 'saves': random.randint(1, 5), 'clean_sheet': win}),
+        ("Di Lorenzo", {'role': 'DEF', 'prog_passes': random.randint(3, 9), 'passes_box': random.randint(0, 3), 'dribbles': random.randint(0, 2)}),
+        ("Rrahmani", {'role': 'DEF', 'prog_passes': random.randint(1, 5), 'passes_box': 0, 'dribbles': 0}),
+        ("Buongiorno", {'role': 'DEF', 'prog_passes': random.randint(4, 10), 'passes_box': 0, 'dribbles': random.randint(0, 1)}),
+        ("Olivera", {'role': 'DEF', 'prog_passes': random.randint(3, 7), 'passes_box': random.randint(0, 2), 'dribbles': random.randint(0, 3)}),
+        ("Lobotka", {'role': 'MID', 'prog_passes': random.randint(10, 22), 'passes_box': random.randint(0, 2), 'dribbles': random.randint(1, 3)}),
+        ("Anguissa", {'role': 'MID', 'prog_passes': random.randint(5, 12), 'passes_box': random.randint(1, 3), 'dribbles': random.randint(1, 4)}),
+        ("McTominay", {'role': 'MID', 'prog_passes': random.randint(4, 9), 'passes_box': random.randint(2, 6), 'dribbles': random.randint(1, 3)}),
+        ("Politano", {'role': 'ATT', 'prog_passes': random.randint(2, 6), 'passes_box': random.randint(3, 8), 'dribbles': random.randint(2, 6)}),
+        ("Kvaratskhelia", {'role': 'ATT', 'prog_passes': random.randint(4, 11), 'passes_box': random.randint(5, 10), 'dribbles': random.randint(5, 11)}),
+        ("Lukaku", {'role': 'ATT', 'prog_passes': random.randint(1, 4), 'passes_box': random.randint(6, 12), 'dribbles': random.randint(0, 2)}),
     ]
     
     players_data = [
